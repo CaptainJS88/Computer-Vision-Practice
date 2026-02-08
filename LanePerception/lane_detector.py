@@ -39,7 +39,7 @@ def draw_lines(image, lines):
     return line_image
 
 # Importing test_lane image and converting to grayscale
-img_test_lane = cv2.imread('./Images/road2.png')
+img_test_lane = cv2.imread('./Images/test_lane.jpg')
 
 # Check if image is loaded or not
 if img_test_lane is None: 
