@@ -23,8 +23,23 @@ def region_of_interest (image):
     masked_image = cv2.bitwise_and(image, black_mask)
     return masked_image
 
+# Helper function to draw lines from the co-ordinates we plant to get from cv2.HoughLinesP
+
+def draw_lines(image, lines): 
+    # Create black image of the image with same dimensions
+    line_image = np.zeros_like(image)
+
+    if lines is not None: 
+        for line in lines:
+            # Get co-ordinates
+            x1, y1, x2, y2 = line.reshape(4)
+            # Draw a thick blue line (BGR color: 255, 0, 0)
+            cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
+
+    return line_image
+
 # Importing test_lane image and converting to grayscale
-img_test_lane = cv2.imread('./Images/test_lane.jpg')
+img_test_lane = cv2.imread('./Images/road2.png')
 
 # Check if image is loaded or not
 if img_test_lane is None: 
@@ -49,8 +64,13 @@ img_test_lane_canny2 = cv2.Canny(img_test_lane_blur, 40, 160)
 img_test_lane_canny3 = cv2.Canny(img_test_lane_blur, 60, 140)
 img_test_lane_cropped = cv2.Canny(region_of_interest(img_test_lane_gray), 50, 150)
 
-# plt.imshow(img_test_lane_canny, cmap='gray')
-# plt.show()
+# Hough Transform to find lines
+# rho=2, theta=1 degree, threshold=100 votes
+# minLineLength=40 pixels, maxLineGap=5 pixels (connects dashed lines!)
+lines = cv2.HoughLinesP(img_test_lane_cropped, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+
+# Draw lines on black image
+black_line_image = draw_lines(img_test_lane, lines)
 
 # Showing them together to highlight the difference (2 rows x 3 columns)
 fig, axes = plt.subplots(2, 3, figsize=(12, 7))
@@ -76,4 +96,16 @@ axes[5].axis('off')
 fig.suptitle('Lane perception pipeline', fontsize=14, fontweight='bold', y=1.02)
 plt.tight_layout()
 plt.show()
+
+# 8. Blend the original image with the line image
+# 0.8 = keep 80% of the original road brightness
+# 1.0 = keep 100% of the blue line brightness
+combo_image = cv2.addWeighted(img_test_lane, 0.8, black_line_image, 1, 1)
+
+# Show the final result
+# We convert BGR (OpenCV format) to RGB (Matplotlib format) so colors look right
+plt.imshow(cv2.cvtColor(combo_image, cv2.COLOR_BGR2RGB))
+plt.show()
+
+
 
