@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 def region_of_interest (image): 
     # define height and width of grayscale image
-    img_height = img_test_lane_gray.shape[0]
-    img_width = img_test_lane_gray.shape[1]
+    img_height = image.shape[0]
+    img_width = image.shape[1]
 
     # Define our triangle polygon (Bottom-Left, Top-Peak, Bottom-Right)
     img_triangle = np.array([[(0, img_height), (img_width // 2, 120), (img_width, img_height)]])
@@ -62,7 +62,7 @@ img_test_lane_blur = cv2.GaussianBlur(img_test_lane_gray, (5, 5), 0)
 img_test_lane_canny1 = cv2.Canny(img_test_lane_blur, 50, 150)
 img_test_lane_canny2 = cv2.Canny(img_test_lane_blur, 40, 160)
 img_test_lane_canny3 = cv2.Canny(img_test_lane_blur, 60, 140)
-img_test_lane_cropped = cv2.Canny(region_of_interest(img_test_lane_gray), 50, 150)
+img_test_lane_cropped = region_of_interest(cv2.Canny(img_test_lane_gray, 50, 150))
 
 # Hough Transform to find lines
 # rho=2, theta=1 degree, threshold=100 votes
