@@ -3,6 +3,26 @@ import cv2
 import numpy as np  
 import matplotlib.pyplot as plt 
 
+# Function to create a region on interest, which in our case is a triangle. This helps us 
+# Mask the other parts of the image like trees, fences, branches, etc. 
+
+def region_of_interest (image): 
+    # define height and width of grayscale image
+    img_height = img_test_lane_gray.shape[0]
+    img_width = img_test_lane_gray.shape[1]
+
+    # Define our triangle polygon (Bottom-Left, Top-Peak, Bottom-Right)
+    img_triangle = np.array([[(0, img_height), (img_width // 2, 120), (img_width, img_height)]])
+
+    # Create a black mask of the given width and height
+    black_mask = np.zeros_like(image)
+
+    # Fill the triangle with white
+    cv2.fillPoly(black_mask, img_triangle, 255)
+
+    masked_image = cv2.bitwise_and(image, black_mask)
+    return masked_image
+
 # Importing test_lane image and converting to grayscale
 img_test_lane = cv2.imread('./Images/test_lane.jpg')
 
@@ -27,8 +47,7 @@ img_test_lane_blur = cv2.GaussianBlur(img_test_lane_gray, (5, 5), 0)
 img_test_lane_canny1 = cv2.Canny(img_test_lane_blur, 50, 150)
 img_test_lane_canny2 = cv2.Canny(img_test_lane_blur, 40, 160)
 img_test_lane_canny3 = cv2.Canny(img_test_lane_blur, 60, 140)
-img_test_lane_cannyNoBlur = cv2.Canny(img_test_lane_gray, 50, 150)
-
+img_test_lane_cropped = cv2.Canny(region_of_interest(img_test_lane_gray), 50, 150)
 
 # plt.imshow(img_test_lane_canny, cmap='gray')
 # plt.show()
@@ -44,7 +63,7 @@ images = [
     (img_test_lane_canny1, 'Canny (50, 150)'),
     (img_test_lane_canny2, 'Canny (40, 160)'),
     (img_test_lane_canny3, 'Canny (60, 140)'),
-    (img_test_lane_cannyNoBlur, 'Canny No Blur (50, 150)')
+    (img_test_lane_cropped, 'Canny cropped (50, 150)')
 ]
 for i, (img, title) in enumerate(images):
     axes[i].imshow(img, cmap='gray')
