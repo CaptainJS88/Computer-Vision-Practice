@@ -73,7 +73,7 @@ def draw_lines(image, lines):
     return line_image
 
 # Importing test_lane image and converting to grayscale
-img_test_lane = cv2.imread('./Images/test_lane.jpg')
+img_test_lane = cv2.imread('./Images/prettyRoad.png')
 
 # Check if image is loaded or not
 if img_test_lane is None: 
@@ -140,6 +140,42 @@ combo_image = cv2.addWeighted(img_test_lane, 0.8, black_line_image, 1, 1)
 # We convert BGR (OpenCV format) to RGB (Matplotlib format) so colors look right
 plt.imshow(cv2.cvtColor(combo_image, cv2.COLOR_BGR2RGB))
 plt.show()
+
+# Video Capture
+video_lane = cv2.VideoCapture('./Videos/solidWhiteRight.mp4')
+
+# Set up VideoWriter to save the processed video (same size and FPS as input)
+width = int(video_lane.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(video_lane.get(cv2.CAP_PROP_FRAME_HEIGHT))
+fps = video_lane.get(cv2.CAP_PROP_FPS)
+output_path = './Videos/output_lanes.mp4'
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+while(video_lane.isOpened()):
+   ret, frame = video_lane.read()
+
+   if not ret: 
+    break
+   else:
+    #cv2.imshow("Test frame from video", frame)
+    canny_image = cv2.Canny(frame, 50, 150)
+    cropped_canny_image = region_of_interest(canny_image)
+    lines = cv2.HoughLinesP(cropped_canny_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+    black_line_canny = draw_lines(frame, lines)
+    combo_frame = cv2.addWeighted(frame, 0.8, black_line_canny, 1, 1)
+    out.write(combo_frame)
+    cv2.imshow("Test frame from vid", combo_frame)
+
+   # Press 'q' to quit
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break 
+
+video_lane.release()
+out.release()
+cv2.destroyAllWindows()
+print(f"Saved processed video to {output_path}")
+
 
 
 
