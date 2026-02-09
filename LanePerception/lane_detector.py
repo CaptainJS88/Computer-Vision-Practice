@@ -1,10 +1,5 @@
-# Fixes needed before linkedin post
-# Show oroginal image in the output and then the rest, reduce the canny edge cases
-# Fix the lane detection being wonky and un predictable. 
+# Building a lane perception program that can take road images and dashcam video as input and highlight lanes from it. 
 
-
-
-# Building a lane perception thingy that can take dashcam video as input and highlight lanes from it. 
 import cv2
 import numpy as np  
 import matplotlib.pyplot as plt 
@@ -60,13 +55,22 @@ def draw_lines(image, lines):
                 slope_m = (y2 - y1)/(x2 - x1)
             intercept = y1 - slope_m*x1
 
-            if slope_m <= 0: 
-                left_slopes.append([slope_m, intercept])
-            else: 
-                right_slopes.append([slope_m, intercept])
+            if abs(slope_m) > 0.5:
+                if slope_m <= 0: 
+                    left_slopes.append([slope_m, intercept])
+                else: 
+                    right_slopes.append([slope_m, intercept])
+
+    if len(left_slopes) > 0:
+          avg_left_slope = np.average(left_slopes, axis=0)
+    else:
+        avg_left_slope = None
     
-    avg_left_slope = np.average(left_slopes, axis=0)
-    avg_right_slope = np.average(right_slopes, axis=0)
+    if len(right_slopes) > 0:
+          avg_right_slope = np.average(right_slopes, axis=0)
+    else:
+        avg_right_slope = None
+    
 
     # Calculate coordinates for Left Lane
     if avg_left_slope is not None: # Check if we actually found a line
@@ -103,7 +107,7 @@ img_test_lane_median_blur = cv2.medianBlur(img_test_lane_gray, 5, 0)
 # if there is a sharp change between gravel and white line, there's a gradient there. We use gradients for 
 # Edge detection
 
-# Canny Algorithm/Tool!!! 50, 150 are the thresholds.
+# Canny Algorithm/Tool 50, 150 are the thresholds we're using, others for experiementation.
 
 img_test_lane_canny1 = cv2.Canny(img_test_lane_blur, 50, 150)
 img_test_lane_canny2 = cv2.Canny(img_test_lane_blur, 40, 160)
@@ -154,7 +158,7 @@ plt.imshow(cv2.cvtColor(combo_image, cv2.COLOR_BGR2RGB))
 plt.show()
 
 # Video Capture
-video_lane = cv2.VideoCapture('./Videos/solidWhiteRight.mp4')
+video_lane = cv2.VideoCapture('./Videos/challenge.mp4')
 
 # Set up VideoWriter to save the processed video (same size and FPS as input)
 width = int(video_lane.get(cv2.CAP_PROP_FRAME_WIDTH))
