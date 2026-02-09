@@ -158,7 +158,7 @@ plt.imshow(cv2.cvtColor(combo_image, cv2.COLOR_BGR2RGB))
 plt.show()
 
 # Video Capture
-video_lane = cv2.VideoCapture('./Videos/challenge.mp4')
+video_lane = cv2.VideoCapture('./Videos/solidWhiteRight.mp4')
 
 # Set up VideoWriter to save the processed video (same size and FPS as input)
 width = int(video_lane.get(cv2.CAP_PROP_FRAME_WIDTH))
