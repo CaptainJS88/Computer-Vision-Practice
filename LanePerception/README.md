@@ -34,7 +34,7 @@ pip install opencv-python numpy matplotlib
 2. Put your dashcam videos in the `Videos/` folder
 3. Run the script:
    ```bash
-   python lane_detector.py
+   python3 lane_detector.py
    ```
 
 The script will:
