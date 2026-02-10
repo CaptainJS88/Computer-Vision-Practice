@@ -1,4 +1,4 @@
-# Computer Vision Practice
+# Computer Vision Project
 
 A collection of computer vision projects I'm working on to learn image processing, object detection, and related techniques.
 
