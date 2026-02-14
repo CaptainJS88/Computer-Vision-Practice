@@ -1,5 +1,6 @@
 # Building a lane perception program that can take road images and dashcam video as input and highlight lanes from it. 
 
+from cgitb import grey
 from doctest import debug
 from PIL.ImageQt import rgb
 import cv2
@@ -237,8 +238,8 @@ M = cv2.getPerspectiveTransform(src, dst)
 
 # We need the width and height of the image for the last argument
 img_size = (img_test_lane_rgb.shape[1], img_test_lane_rgb.shape[0]) # (width, height)
-warped_image = cv2.warpPerspective(img_test_lane_rgb, M, img_size)
-plt.imshow(warped_image)
+warped_image = cv2.warpPerspective(img_test_lane_gray, M, img_size)
+plt.imshow(warped_image, cmap='gray')
 plt.show()
 
 
