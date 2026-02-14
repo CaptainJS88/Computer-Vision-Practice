@@ -1,5 +1,7 @@
 # Building a lane perception program that can take road images and dashcam video as input and highlight lanes from it. 
 
+from doctest import debug
+from PIL.ImageQt import rgb
 import cv2
 import numpy as np  
 import matplotlib.pyplot as plt 
@@ -191,6 +193,54 @@ video_lane.release()
 out.release()
 cv2.destroyAllWindows()
 print(f"Saved processed video to {output_path}")
+
+# Creating a bird's eye view to mimic a drone view - this will help us handle cases where there are curves on the road. 
+# Idea is to use the cropped triangle image and chop off a portion at the head. Then, we use the points of the remaining trapezoid
+# to do a perspective transform using cv2.perspectiveTransform() to give us the new values. 
+
+# Define src and dst for perspective transform lane
+h, w = img_test_lane.shape[:2]
+
+src = np.float32([
+    [w * 0.025, h],       # Bottom-Left
+    [w * 0.975, h],       # Bottom-Right
+    [w * 0.70, h * 0.65], # Top-Right (Example ratio)
+    [w * 0.30, h * 0.65]  # Top-Left (Example ratio)
+])
+
+dst = np.float32([
+    [w * 0.20, h],       # Bottom-Left
+    [w * 0.80, h],       # Bottom-Right
+    [w * 0.80, 0],       # Top-Right
+    [w * 0.20, 0]        # Top-Left
+])
+
+print("Image shape:", img_test_lane.shape)
+
+# Chop off the image and lets see what it looks like
+# Create a copy so we don't mess up the original
+debug_image = img_test_lane_rgb.copy()
+
+# Draw the 4 source points
+for point in src:
+    x, y = int(point[0]), int(point[1])
+    cv2.circle(debug_image, (x, y), 10, (255, 0, 0), -1) # Red dots
+
+# Draw the polygon connecting them
+pts = src.reshape((-1, 1, 2)).astype(np.int32)
+cv2.polylines(debug_image, [pts], True, (255, 0, 0), 3)
+
+plt.imshow(debug_image)
+plt.show()
+
+M = cv2.getPerspectiveTransform(src, dst)
+
+# We need the width and height of the image for the last argument
+img_size = (img_test_lane_rgb.shape[1], img_test_lane_rgb.shape[0]) # (width, height)
+warped_image = cv2.warpPerspective(img_test_lane_rgb, M, img_size)
+plt.imshow(warped_image)
+plt.show()
+
 
 
 
